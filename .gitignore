@@ -1,2 +1,6 @@
 /Fernando_controle.txt
 /venv/
+servidor_backend/__pycache__/
+gateway_lora/__pycache__/
+venv/
+servidor_backend/database.db

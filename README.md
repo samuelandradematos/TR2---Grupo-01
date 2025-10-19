@@ -1,5 +1,5 @@
-<<<<<<< HEAD
 # TR2---Grupo-01
+<<<<<<< HEAD
 =======
 # TR2---Grupo-01
 >>>>>>> cca3018 (Adiciona pasta venv ao gitignore)
@@ -37,3 +37,6 @@ Firmware:
         </ul>
     </li>
 </ul>
+=======
+
+>>>>>>> 3ee6428 (Prototipo)

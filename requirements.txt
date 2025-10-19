@@ -1,0 +1,3 @@
+#Bibliotecas Necessarias para o projeto.
+
+Flask
