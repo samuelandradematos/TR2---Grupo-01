@@ -17,5 +17,24 @@ Firmware:
     <li>SPI (Comunicação do ESP com o LoRa, presente tanto no servo como no mestre)</li>
     <li>I2C (Comunicação do modulo SHT40/41 com o servo)</li>
     <li>PWM (Comunicação do modulo DSM501A com o servo)</li>
-    <li>No servo: Lógica de rede e transporte, i.e. tamanho dos pacotes e sockets/portas, para ser enviado via LoRa os dados coletados pelos modulos para o mestre</li>
+    <li>No servo: 
+        <ul>
+            <li>Separaçao dos dados de cada sensor, e do nivel da bateria, em pacotes para ser enviados pelo LoRa</li>
+            <li>Logica de gerenciamento de energia e frequencia de envio</li>
+            <li>Monitoramento da bateria</li>
+            <li>Logica de transporte, UDP</li>
+        </ul>
+    </li>
+    <li>No mestre:
+        <ul>
+            <li>Logica de categorizaçao para envio ao servidor</li>
+            <li>Agregaçao dos dados para ser enviados para o servidor, TCP</li>
+            <li>Verificaçao da situaçao do servo a cada <b>delta t</b>, UDP</li>
+        </ul>
+    </li>
+    <li>Comum a ambos(servo e mestre):
+        <ul>
+            <li>Logica de rede</li>
+        </ul>
+    </li>
 </ul>
