@@ -22,13 +22,12 @@ Firmware:
             <li>Separaçao dos dados de cada sensor, e do nivel da bateria, em pacotes para ser enviados pelo LoRa</li>
             <li>Logica de gerenciamento de energia e frequencia de envio</li>
             <li>Monitoramento da bateria</li>
-            <li>Logica de transporte, UDP</li>
         </ul>
     </li>
     <li>No mestre:
         <ul>
             <li>Logica de categorizaçao para envio ao servidor</li>
-            <li>Agregaçao dos dados para ser enviados para o servidor, TCP</li>
+            <li>AComunicaçao TCP com o servidor, com uma certa frequencia</li>
             <li>Verificaçao da situaçao do servo a cada <b>delta t</b>, UDP</li>
         </ul>
     </li>
