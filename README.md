@@ -34,6 +34,8 @@ Firmware:
     <li>Comum a ambos(servo e mestre):
         <ul>
             <li>Logica de rede</li>
+            <li>Roda Servidor: python3 -m servidor_backend.app_run</li>
+            <li>Ennvia dados: python3 gateway_lora/gateway_udp_sim.py</li>
         </ul>
     </li>
 </ul>
