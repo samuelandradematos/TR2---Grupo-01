@@ -1,11 +1,12 @@
-# servidor_backend/http_dashboard.py
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json, os
 
 try:
     from .state import ultimo, lock_ultimo
+    from .storage import get_all  # IMPORTAR A NOVA FUNÇÃO
 except ImportError:
     from state import ultimo, lock_ultimo
+    from storage import get_all  # IMPORTAR A NOVA FUNÇÃO
 
 ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard_web")
 
@@ -21,17 +22,32 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(body)
                 return
+
+            # --- NOVO ENDPOINT DE HISTÓRICO ---
+            if self.path == "/all":
+                dados = get_all(limit=200)  # Chama a função do storage
+                body = json.dumps(dados).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            # --- FIM DO NOVO ENDPOINT ---
+
             if self.path == "/" or self.path.startswith("/index.html"):
                 return self._serve("index.html", "text/html; charset=utf-8")
             if self.path.startswith("/script.js"):
                 return self._serve("script.js", "application/javascript; charset=utf-8")
             if self.path.startswith("/style.css"):
                 return self._serve("style.css", "text/css; charset=utf-8")
+            
             self.send_response(404); self.end_headers()
         except BrokenPipeError:
             pass
 
     def _serve(self, name, ctype):
+        # (A função _serve continua exatamente a mesma)
         path = os.path.join(ROOT, name)
         if not os.path.isfile(path):
             self.send_response(404); self.end_headers(); return
@@ -44,6 +60,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 def start_http(host="0.0.0.0", port=8000):
+    # (A função start_http continua exatamente a mesma)
     httpd = HTTPServer((host, port), Handler)
     print(f"Dashboard em http://{host if host!='0.0.0.0' else 'localhost'}:{port}")
     httpd.serve_forever()

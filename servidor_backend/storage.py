@@ -29,3 +29,22 @@ def salvar(doc: dict):
              float(doc["umidade"]), int(doc["poeira"]), int(doc["seq"]))
         )
         con.commit()
+
+def get_all(limit=200) -> list[dict]:
+    """Busca as N últimas medidas do banco de dados."""
+    registros = []
+    # Usamos sqlite3.Row para poder converter o resultado em dict facilmente
+    with sqlite3.connect(DB_PATH) as con:
+        con.row_factory = sqlite3.Row 
+        cursor = con.execute(
+            """
+            SELECT id, sala, ts, temperatura, umidade, poeira, seq 
+            FROM medidas 
+            ORDER BY id DESC 
+            LIMIT ?
+            """,
+            (limit,)
+        )
+        for row in cursor.fetchall():
+            registros.append(dict(row)) # Converte a Row em um dict
+    return registros
