@@ -1,4 +1,4 @@
-// --- Função para a tabela LIVE (TEMPO REAL) ---
+// --- Função para a tabela LIVE (TEMPO REAL)
 async function tick() {
   const tbody = document.getElementById('live-data-body'); // ID ATUALIZADO
 
@@ -37,7 +37,7 @@ async function tick() {
   tbody.innerHTML = html;
 }
 
-// --- NOVA FUNÇÃO para a tabela de HISTÓRICO ---
+// FUNÇÃO para a tabela de HISTÓRICO
 async function loadHistory() {
   const tbody = document.getElementById('history-data-body');
   let historyData;
@@ -73,8 +73,8 @@ async function loadHistory() {
   tbody.innerHTML = html;
 }
 
-// --- NOVA FUNÇÃO para configurar o BOTÃO DE TOGGLE ---
-let isHistoryLoaded = false; // Flag para carregar dados só uma vez
+//FUNÇÃO para configurar o BOTÃO DE TOGGLE
+let isHistoryLoaded = false;
 
 function setupToggleButton() {
   const btn = document.getElementById('btn-toggle-history');
@@ -83,8 +83,8 @@ function setupToggleButton() {
   btn.addEventListener('click', async () => {
     const isHidden = container.classList.contains('hidden');
 
-    if (isHidden) { // Se está escondido, VAMOS MOSTRAR
-      // 1. Carrega os dados (apenas se for a 1ª vez)
+    if (isHidden) {
+      // Carrega os dados (apenas se for a 1ª vez)
       if (!isHistoryLoaded) {
         btn.textContent = 'Carregando...';
         btn.disabled = true;
@@ -93,18 +93,17 @@ function setupToggleButton() {
         btn.disabled = false;
       }
       
-      // 2. Mostra o container e atualiza o botão
       container.classList.remove('hidden');
       btn.textContent = 'Esconder Histórico';
 
-    } else { // Se está visível, VAMOS ESCONDER
+    } else {
       container.classList.add('hidden');
       btn.textContent = 'Mostrar Histórico';
     }
   });
 }
 
-// --- INICIALIZAÇÃO ---
-setInterval(tick, 2000); // Atualiza a tabela live
-tick();                   // Carrega a tabela live pela 1ª vez
-setupToggleButton();      // Configura o botão de histórico
+
+setInterval(tick, 2000);
+tick();                  
+setupToggleButton();

@@ -1,5 +1,4 @@
 # (SQLite + funções de persistência)
-
 import sqlite3, json, os, time
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
@@ -33,7 +32,6 @@ def salvar(doc: dict):
 def get_all(limit=200) -> list[dict]:
     """Busca as N últimas medidas do banco de dados."""
     registros = []
-    # Usamos sqlite3.Row para poder converter o resultado em dict facilmente
     with sqlite3.connect(DB_PATH) as con:
         con.row_factory = sqlite3.Row 
         cursor = con.execute(

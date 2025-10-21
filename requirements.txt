@@ -1,3 +1,20 @@
-#Bibliotecas Necessarias para o projeto.
-
-Flask
+# --- Requisitos do Projeto de Monitoramento LoRa ---
+#
+# Este projeto foi desenvolvido intencionalmente utilizando
+# apenas bibliotecas padrão do Python 3 (built-in).
+#
+# Por causa disso, não há pacotes externos para serem instalados via 'pip'.
+#
+# O único requisito é ter o Python 3 instalado.
+#
+# Módulos padrão utilizados:
+# - socket
+# - http.server
+# - sqlite3
+# - threading
+# - queue
+# - json
+# - os
+# - time
+# - logging
+# - random

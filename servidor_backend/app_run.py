@@ -1,4 +1,3 @@
-# servidor_backend/app_run.py
 import os, sys, threading
 BASE = os.path.dirname(__file__)
 if BASE not in sys.path:

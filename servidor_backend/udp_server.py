@@ -1,5 +1,3 @@
-# (receptor UDP, decodifica e enfileira)
-
 import socket, json, threading, logging
 from state import fila, ultimo, lock_ultimo
 from storage import init_db, salvar
