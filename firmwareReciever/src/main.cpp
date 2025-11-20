@@ -11,25 +11,23 @@
 
 void setup() {
     Serial.begin(115200);
+    while(!Serial);
 
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
     LoRa.setPins(LORA_CS, LORA_RST, LORA_DIO0);
 
     if (!LoRa.begin(433E6)) {
-        Serial.println("Erro ao iniciar LoRa!");
-        while (true);
+        while (true); 
     }
-
-    Serial.println("Receptor LoRa pronto!");
 }
 
 void loop() {
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
-        Serial.print("Recebido: ");
+        String pacote = "";
         while (LoRa.available()) {
-            Serial.print((char)LoRa.read());
+            pacote += (char)LoRa.read();
         }
-        Serial.println();
+        Serial.println(pacote); 
     }
 }

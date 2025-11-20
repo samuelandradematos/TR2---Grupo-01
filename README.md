@@ -23,6 +23,16 @@ O servidor, desenvolvido inteiramente em **Python com bibliotecas padrão** (`so
     * Dados em tempo real (com atualização automática).
     * Histórico dos últimos 200 registros (carregados sob demanda).
 
+## 🔧 Funcionalidades Adicionadas
+
+* **Monitoramento em Tempo Real:** Atualização a cada 2 segundos.
+* **Sistema de Alertas Visuais com Critérios:**
+  * 🔴 Temperatura > 26.0°C
+  * 🟡 Umidade < 30% ou > 70%
+  * 🔘 Poeira > 35 partículas
+* **Protocolo em Hexadecimal:** Conversão de valores float em hex para reduzir airtime LoRa e consumo.
+* **Modo Dual:** Suporte a hardware real (Serial/USB) ou modo Mock com simulação.
+
 ## 3. Arquitetura do Sistema
 
 A arquitetura do sistema é dividida em três camadas lógicas principais, conforme o diagrama
@@ -43,94 +53,73 @@ A arquitetura do sistema é dividida em três camadas lógicas principais, confo
     * O `script.js` faz chamadas `fetch` periódicas para `/last` (que lê o último estado da memória) para atualizar a tabela de tempo real.
     * Ao clicar no botão, o `script.js` faz um `fetch` para `/all` (que consulta o banco de dados) para preencher o histórico.
 
-## 4. Tecnologias Utilizadas
+## 📂 Estrutura Atualizada do Projeto
 
-### Hardware (Implementação Real)
+```
+TR2---GRUPO-01/
+├── dashboard_web/
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+│
+├── firmwareReciever/
+├── firmwareSender/
+│
+├── gateway_lora/
+│   ├── config.py
+│   ├── gateway_serial.py
+│   ├── gateway_serial_mock.py
+│   └── payload.py
+│
+├── servidor_backend/
+│   ├── app_run.py
+│   ├── udp_server.py
+│   ├── http_dashboard.py
+│   ├── storage.py
+│   └── state.py
+│
+├── diagrama_monitoramento.png
+├── README.md
+└── requirements.txt
+```
 
-* **Microcontrolador:** 2x ESP32-S3R8
-* **Comunicação LoRa:** 2x LoRa SX1278
-* **Sensores:**
-    * SHT40/41 (Temperatura e Umidade) - via I2C
-    * DSM501A (Poeira) - via PWM
-
-### Software e Protocolos
-
-* **Backend:** Python 3 (sem frameworks externos)
-* **Bibliotecas Padrão (Python):**
-    * `socket`: Para o servidor UDP.
-    * `http.server`: Para o servidor web e API.
-    * `sqlite3`: Para o banco de dados.
-    * `threading`: Para concorrência (UDP, Web, DB worker).
-    * `queue`: Para desacoplamento entre threads.
-    * `json`, `logging`, `time`, `os`
-* **Frontend:** HTML5, CSS3, JavaScript (ES6+ com `fetch` e `async/await`)
-* **Protocolos:** LoRa, UDP, IP, HTTP
-* **Formato de Dados:** JSON
-
-## 5. Como Executar o Protótipo (Simulado)
-
-Este repositório contém o **Servidor Backend** e um **Simulador de Gateway** em Python, permitindo testar toda a camada de Aplicação e Transporte sem o hardware real.
+## 5. Como Executar (Versão Atualizada)
 
 ### Pré-requisitos
 
-* Python 3.7 ou superior.
+```bash
+Python 3.7+
+pip install pyserial
+```
 
-### 1. Iniciar o Servidor Backend
-
-Em um terminal, execute o módulo `app_run` de dentro da pasta `servidor_backend`. Isso iniciará todos os serviços:
+### Iniciar o Backend
 
 ```bash
-# A partir da raiz do projeto
 python3 -m servidor_backend.app_run
 ```
 
-### 2. Iniciar o Simulador do Gateway
+### Executar o Gateway
 
-Em um outro terminal, execute o script do gateway simulado:
+#### Modo Simulado
 
 ```bash
-# A partir da raiz do projeto
-python3 gateway_lora/gateway_udp_sim.py
+python3 gateway_lora/gateway_serial_mock.py
 ```
 
-Este script começará a enviar pacotes UDP (dados falsos de "Sala: Servidor") para o seu servidor a cada 5 segundos. Você verá os logs de "Enviado" no terminal do gateway e "Rx" no terminal do servidor.
+#### Modo Real
 
-### 3. Acessar o Dashboard
-
-Abra seu navegador e acesse:
-
-[http://localhost:8000](http://localhost:8000)
-
-A tabela "Dados em Tempo Real" deve exibir os dados da "Sala: Servidor" e atualizar automaticamente.
-
-Clique em "Mostrar Histórico" para ver os dados sendo persistidos no banco de dados.
-
-## 6. Estrutura de Pastas
+```bash
+python3 gateway_lora/gateway_serial.py
 ```
-.
-├── gateway_lora/
-│   ├── gateway_udp_sim.py   # (SIMULADOR) Envia pacotes UDP falsos
-│   ├── payload.py           # Helper para formatar o JSON
-│   └── config.py            # Configurações (IP, porta, nome da sala)
-│
-├── servidor_backend/
-│   ├── app_run.py           # Ponto de entrada (inicia as 3 threads)
-│   ├── udp_server.py        # Thread 1: Servidor UDP (socket) + Thread 2: Worker (queue)
-│   ├── http_dashboard.py    # Thread 3: Servidor HTTP (http.server) e API
-│   ├── storage.py           # Lógica de banco de dados (sqlite3)
-│   ├── state.py             # Estado em memória (queue, lock, ultimo_valor)
-│   ├── schema.sql           # (Referência) DDL da tabela
-│   └── database.db          # (Gerado) Arquivo do banco de dados
-│
-├── dashboard_web/
-│   ├── index.html           # Estrutura do dashboard
-│   ├── script.js            # Lógica do frontend (fetch, DOM)
-│   └── style.css            # Estilização da página
-│
-└── README.md                # Este arquivo
+
+###Acessar o Dashboard
+
+```
+http://localhost:8000
 ```
 
 ## 7. Autores
+
 - Adriele Evellen Alves de Abreu — 20/2042785
 - Fernando Nunes de Freitas — 22/2014661
 - Samuel Andrade de Matos — 17/0155943
@@ -171,4 +160,5 @@ Firmware:
         </ul>
     </li>
 </ul>
+
 
