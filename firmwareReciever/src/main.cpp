@@ -26,7 +26,6 @@ void setup() {
 void loop() {
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
-        Serial.print("Recebido: ");
         while (LoRa.available()) {
             Serial.print((char)LoRa.read());
         }

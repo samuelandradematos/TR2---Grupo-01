@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <DHTesp.h>
 
 #define LORA_SCK 12
 #define LORA_MISO 13
@@ -8,6 +9,10 @@
 #define LORA_CS 10
 #define LORA_RST 9
 #define LORA_DIO0 14
+#define DHT_PIN 46
+#define DHT_TYPE DHT11
+
+DHTesp dht;
 
 void setup() {
     Serial.begin(115200);
@@ -19,16 +24,26 @@ void setup() {
         Serial.println("Erro ao iniciar LoRa!");
         while (true);
     }
-
+    dht.setup(46, DHTesp::DHT11);
     Serial.println("Transmissor LoRa pronto!");
 }
 
+int timeESP = 0;
 void loop() {
-    LoRa.beginPacket();
-    LoRa.print("Mensagem do transmissor");
-    LoRa.endPacket();
-
-    Serial.println("Pacote enviado!");
-
-    delay(2000);
+    String msg = "";
+    delay(dht.getMinimumSamplingPeriod()); // Espera o tempo minimo entre leituras
+    timeESP++;
+    float humidity = dht.getHumidity();
+    float temperature = dht.getTemperature();
+    if (String(humidity) != "nan" && String(temperature) != "nan") {
+        Serial.println(timeESP);
+        if (timeESP >= 2){ // 10800 para eficiencia energetica (3 horas)
+            msg = String(temperature) + "," + String(humidity);
+            LoRa.beginPacket();
+            LoRa.print(msg);
+            LoRa.endPacket();
+            timeESP = 0;
+        }
+    }
+    Serial.println(msg);
 }
