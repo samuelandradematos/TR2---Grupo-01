@@ -14,38 +14,106 @@
 
 DHTesp dht;
 
-#define BAND 433E6 
-String NOME_SALA = "Sala_Servidor";
+// Variáveis RTC para armazenar a última leitura
+RTC_DATA_ATTR int rtcBootCount = 0;
+RTC_DATA_ATTR float rtcLastTemp = NAN;
+RTC_DATA_ATTR float rtcLastHum = NAN;
+
+const long int SHORT_WAKE_SECS = 3;    // checagem rápida (ex: 10 min)
+const long int LONG_SLEEP_SECS = 30;  // sono longo (ex: 3 horas)
+const float TEMP_THRESHOLD = 5.0;        // graus Celsius
+const float HUM_THRESHOLD = 10.0;        // porcentagem
+
+void goToDeepSleep(long int sleepSeconds) {
+    Serial.println("Indo para o modo de sono profundo...");
+    Serial.flush();
+
+    LoRa.end();
+    SPI.end();
+
+    esp_sleep_enable_timer_wakeup(sleepSeconds * 1000000LL);
+    esp_deep_sleep_start();
+}
+
+void sendMeasurement(float temperature, float humidity) {
+    String msg = "";
+    msg = String(temperature, 2) + "," + String(humidity, 2);
+
+    LoRa.beginPacket();
+    LoRa.print(msg);
+    LoRa.endPacket();
+
+}
 
 void setup() {
     Serial.begin(115200);
+
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
     LoRa.setPins(LORA_CS, LORA_RST, LORA_DIO0);
 
-    if (!LoRa.begin(BAND)) {
-        Serial.println("Erro LoRa!");
+    if (!LoRa.begin(433E6)) {
+        Serial.println("Erro ao iniciar LoRa!");
         while (true);
     }
     dht.setup(46, DHTesp::DHT11);
     Serial.println("Transmissor LoRa pronto!");
 }
 
-int timeESP = 0;
 void loop() {
-    String msg = "";
     delay(dht.getMinimumSamplingPeriod()); // Espera o tempo minimo entre leituras
-    timeESP++;
     float humidity = dht.getHumidity();
     float temperature = dht.getTemperature();
-    if (String(humidity) != "nan" && String(temperature) != "nan") {
-        Serial.println(timeESP);
-        if (timeESP >= 2){ // 10800 para eficiencia energetica (3 horas)
-            msg = String(temperature) + "," + String(humidity);
-            LoRa.beginPacket();
-            LoRa.print(msg);
-            LoRa.endPacket();
-            timeESP = 0;
-        }
+
+    if (isnan(temperature) || isnan(humidity)) {
+        Serial.println("Falha ao ler do sensor DHT!");
+        goToDeepSleep(SHORT_WAKE_SECS);
+        return;
     }
-    Serial.println(msg);
+    
+    // Primeira leitura ou valores inválidos armazenados
+    if (isnan(rtcLastHum) || isnan(rtcLastTemp)){
+        Serial.println("Primeira leitura, enviando dados...");
+        rtcLastHum = humidity;
+        rtcLastTemp = temperature;
+        
+        sendMeasurement(temperature, humidity);
+        goToDeepSleep(SHORT_WAKE_SECS);
+        return;
+    }
+
+    float tempDiff = fabs(temperature - rtcLastTemp);
+    float humDiff = fabs(humidity - rtcLastHum);
+
+
+    // Mudança significativa detectada
+    if (tempDiff >= TEMP_THRESHOLD || humDiff >= HUM_THRESHOLD) {
+        Serial.println("Mudança significativa detectada, enviando dados...");
+        rtcLastTemp = temperature;
+        rtcLastHum = humidity;
+        rtcBootCount = 0;
+
+        sendMeasurement(temperature, humidity);
+        goToDeepSleep(LONG_SLEEP_SECS);
+        return;
+    }
+
+    // Incrementa o contador de boots curtos e envia se atingir o limite
+    rtcBootCount++;
+    Serial.println("BootCount atual: " + String(rtcBootCount));
+    int maxBoots = (int)(LONG_SLEEP_SECS / SHORT_WAKE_SECS);
+    if (rtcBootCount >= maxBoots) {
+        Serial.println("Limite de boots curtos atingido, enviando dados...");
+        rtcLastTemp = temperature;
+        rtcLastHum = humidity;
+        rtcBootCount = 0;
+
+        sendMeasurement(temperature, humidity);
+        goToDeepSleep(LONG_SLEEP_SECS);
+        return;
+    }
+
+    // Nenhuma mudança significativa, voltar ao sono curto
+    goToDeepSleep(SHORT_WAKE_SECS);
+    
+    
 }
