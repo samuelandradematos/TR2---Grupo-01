@@ -24,7 +24,6 @@ void setup() {
 void loop() {
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
-        String pacote = "";
         while (LoRa.available()) {
             pacote += (char)LoRa.read();
         }

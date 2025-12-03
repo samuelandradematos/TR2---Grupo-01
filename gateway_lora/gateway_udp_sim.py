@@ -3,12 +3,15 @@
 import socket, random, time
 from config import UDP_HOST, UDP_PORT, PERIODO_S, SALA
 from payload import build_payload
+import serial
 
-def amostra_fake():
+def amostra():
+    ser = serial.Serial('COM6', 9600)  # Substitua 'COM3' pela porta correta
+    linha = ser.readline().decode('utf-8')
+    temp, umid = map(float, linha.strip().split(','))
     return (
-        random.uniform(20, 30),   # temperatura
-        random.uniform(40, 70),   # umidade
-        random.randint(5, 30)     # poeira
+        temp,
+        umid
     )
 
 def main():
@@ -16,8 +19,8 @@ def main():
     seq = 0
     try:
         while True:
-            temp, umid, poeira = amostra_fake()
-            pkt = build_payload(SALA, seq, temp, umid, poeira)
+            temp, umid = amostra()
+            pkt = build_payload(SALA, seq, temp, umid)
             sock.sendto(pkt, (UDP_HOST, UDP_PORT))
             print(f"Enviado seq={seq} bytes={len(pkt)} para {UDP_HOST}:{UDP_PORT}")
             seq = (seq + 1) & 0x7fffffff

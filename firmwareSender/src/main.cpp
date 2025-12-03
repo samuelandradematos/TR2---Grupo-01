@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <DHTesp.h>
 
 #define LORA_SCK 12
 #define LORA_MISO 13
@@ -8,6 +9,10 @@
 #define LORA_CS 10
 #define LORA_RST 9
 #define LORA_DIO0 14
+#define DHT_PIN 46
+#define DHT_TYPE DHT11
+
+DHTesp dht;
 
 #define BAND 433E6 
 String NOME_SALA = "Sala_Servidor";
@@ -21,40 +26,26 @@ void setup() {
         Serial.println("Erro LoRa!");
         while (true);
     }
-    Serial.println("Sender Iniciado!");
+    dht.setup(46, DHTesp::DHT11);
+    Serial.println("Transmissor LoRa pronto!");
 }
 
-// Funções auxiliares para gerar o Hexadecimal
-String floatToHex16(float val) {
-    int raw = (int)(val / 0.0625);
-    char buf[5];
-    sprintf(buf, "%04X", raw & 0xFFFF);
-    return String(buf);
-}
-
-String floatToHexDHT(float val) {
-    int i = (int)val;
-    int d = (int)((val - i) * 10);
-    char buf[5];
-    sprintf(buf, "%02X%02X", i & 0xFF, d & 0xFF);
-    return String(buf);
-}
-
+int timeESP = 0;
 void loop() {
-    float temp = 22.0 + (random(0, 500) / 100.0);
-    float umid = 40.0 + (random(0, 400) / 10.0);
-    int poeira = random(5, 30);
-
-    // Formata: NOME,TEMP_HEX,UMID_HEX,POEIRA_HEX
-    String pacote = NOME_SALA + "," + 
-                    floatToHex16(temp) + "," + 
-                    floatToHexDHT(umid) + "," + 
-                    String(poeira, HEX);
-    
-    LoRa.beginPacket();
-    LoRa.print(pacote);
-    LoRa.endPacket();
-
-    Serial.println("Enviado: " + pacote);
-    delay(5000);
+    String msg = "";
+    delay(dht.getMinimumSamplingPeriod()); // Espera o tempo minimo entre leituras
+    timeESP++;
+    float humidity = dht.getHumidity();
+    float temperature = dht.getTemperature();
+    if (String(humidity) != "nan" && String(temperature) != "nan") {
+        Serial.println(timeESP);
+        if (timeESP >= 2){ // 10800 para eficiencia energetica (3 horas)
+            msg = String(temperature) + "," + String(humidity);
+            LoRa.beginPacket();
+            LoRa.print(msg);
+            LoRa.endPacket();
+            timeESP = 0;
+        }
+    }
+    Serial.println(msg);
 }
