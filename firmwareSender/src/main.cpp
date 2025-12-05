@@ -18,6 +18,7 @@ DHTesp dht;
 RTC_DATA_ATTR int rtcBootCount = 0;
 RTC_DATA_ATTR float rtcLastTemp = NAN;
 RTC_DATA_ATTR float rtcLastHum = NAN;
+RTC_DATA_ATTR int sequenceNumber = 0;
 
 const long int SHORT_WAKE_SECS = 3;    // checagem rápida (ex: 10 min)
 const long int LONG_SLEEP_SECS = 30;  // sono longo (ex: 3 horas)
@@ -37,7 +38,7 @@ void goToDeepSleep(long int sleepSeconds) {
 
 void sendMeasurement(float temperature, float humidity) {
     String msg = "";
-    msg = String(temperature, 2) + "," + String(humidity, 2);
+    msg = String(temperature, 2) + "," + String(humidity, 2) + "," + String(sequenceNumber++);
 
     LoRa.beginPacket();
     LoRa.print(msg);
