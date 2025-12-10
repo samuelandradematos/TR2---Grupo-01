@@ -7,7 +7,7 @@
 #define LORA_MOSI 11
 #define LORA_CS 10
 #define LORA_RST 9
-#define LORA_DIO0 14
+#define LORA_DIO0 46
 
 void setup() {
     Serial.begin(115200);
@@ -19,6 +19,8 @@ void setup() {
     if (!LoRa.begin(433E6)) {
         while (true); 
     }
+
+    Serial.println("LoRa Receiver iniciado");
 }
 
 void loop() {

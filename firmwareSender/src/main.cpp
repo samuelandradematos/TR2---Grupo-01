@@ -8,8 +8,8 @@
 #define LORA_MOSI 11
 #define LORA_CS 10
 #define LORA_RST 9
-#define LORA_DIO0 14
-#define DHT_PIN 46
+#define LORA_DIO0 46
+#define DHT_PIN 47
 #define DHT_TYPE DHT11
 
 DHTesp dht;
@@ -19,9 +19,10 @@ RTC_DATA_ATTR int rtcBootCount = 0;
 RTC_DATA_ATTR float rtcLastTemp = NAN;
 RTC_DATA_ATTR float rtcLastHum = NAN;
 RTC_DATA_ATTR int sequenceNumber = 0;
+RTC_DATA_ATTR float rtcLastTransmissionTime = 0;
 
 const long int SHORT_WAKE_SECS = 3;    // checagem rápida (ex: 10 min)
-const long int LONG_SLEEP_SECS = 30;  // sono longo (ex: 3 horas)
+const long int LONG_SLEEP_SECS = 10;  // sono longo (ex: 3 horas)
 const float TEMP_THRESHOLD = 5.0;        // graus Celsius
 const float HUM_THRESHOLD = 10.0;        // porcentagem
 
@@ -38,12 +39,15 @@ void goToDeepSleep(long int sleepSeconds) {
 
 void sendMeasurement(float temperature, float humidity) {
     String msg = "";
-    msg = String(temperature, 2) + "," + String(humidity, 2) + "," + String(sequenceNumber++);
-
+    msg = String(temperature, 2) + "," + String(humidity, 2) + "," + String(sequenceNumber++) + "," + String(rtcLastTransmissionTime, 2);
+    Serial.println("Enviando mensagem LoRa: " + msg);
+    float startTime = millis() / 1000.0;
     LoRa.beginPacket();
     LoRa.print(msg);
     LoRa.endPacket();
+    float endTime = millis() / 1000.0;
 
+    rtcLastTransmissionTime = endTime - startTime;
 }
 
 void setup() {

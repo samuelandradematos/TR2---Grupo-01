@@ -10,16 +10,23 @@ except ImportError:
     from payload import build_payload
 
 class MockSerial:
+    def __init__(self, port='COM6', baudrate=9600):
+        self.port = port
+        self.baudrate = baudrate
+        print(f"Mock Serial initialized on {self.port} at {self.baudrate} bps")
+        self.seq = 0 # Simulação de sequência
+
     def readline(self):
         temp = random.uniform(20.0, 32.0)
         umid = random.uniform(30.0, 80.0)
-        return f"{temp:.2f}, {umid:.2f}".encode('utf-8')
+        self.seq += 1
+        seq = self.seq
+        return f"{temp:.2f}, {umid:.2f}, {seq}".encode('utf-8')
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ser = MockSerial()
     
-    seq = 0
     sala = "Sala_Servidor"
     
     print(f"Gateway Simulado")
@@ -30,16 +37,10 @@ def main():
             linha = ser.readline().decode('utf-8')
             print(f"[RX Serial]: {linha}")
             try:
-                partes = linha.split(',')
-                
-                if len(partes) >= 2:
-                    temp = float(partes[0])
-                    umid = float(partes[1])
-                    poeira = 40 if random.random() < 0.2 else 15 # valor simulado da poeira
-                    pkt = build_payload(sala, seq, temp, umid, poeira)
-                    sock.sendto(pkt, (UDP_HOST, UDP_PORT))
-                    print(f"UDP Enviado (Seq: {seq})")
-                    seq += 1
+                temp, umid, seq = linha.split(',')
+                pkt = build_payload(sala,float(temp), float(umid), int(seq))
+                sock.sendto(pkt, (UDP_HOST, UDP_PORT))
+                print(f"Enviado seq={seq} bytes={len(pkt)} para {UDP_HOST}:{UDP_PORT}")
                     
             except ValueError:
                 print("[Falha ao converter números")

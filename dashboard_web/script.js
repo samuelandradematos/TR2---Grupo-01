@@ -27,8 +27,8 @@ async function tick() {
     const timestamp = new Date(data.timestamp * 1000).toLocaleString('pt-BR');
     
     
-    // 1. TEMPERATURA (> 26.0) - Crítico (Vermelho)
-    const LIMIT_TEMP = 26.0; 
+    // 1. TEMPERATURA (> 35.0) - Crítico (Vermelho)
+    const LIMIT_TEMP = 35.0; 
     let styleTemp = '';
     let textTemp = '';
     

@@ -6,7 +6,7 @@ try:
     from .storage import get_all
 except ImportError:
     from state import ultimo, lock_ultimo
-    from storage import get_all 
+    from storage import get_all
 
 ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard_web")
 
@@ -24,7 +24,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
 
             if self.path == "/all":
-                dados = get_all(limit=200) 
+                dados = get_all(limit=200)
                 body = json.dumps(dados).encode("utf-8")
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")

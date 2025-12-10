@@ -8,7 +8,7 @@ import serial
 def amostra():
     ser = serial.Serial('COM6', 9600)  # Substitua 'COM3' pela porta correta
     linha = ser.readline().decode('utf-8')
-    temp, umid = map(float, linha.strip().split(','))
+    temp, umid, seq,  = map(float, linha.strip().split(','))
     return (
         temp,
         umid
